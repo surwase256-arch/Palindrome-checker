@@ -1,18 +1,34 @@
 import tkinter as tk
 from tkinter import messagebox
 
+# ---------------- COLORS ----------------
+BG = "#0F172A"
+CARD = "#FFFFFF"
+PRIMARY = "#6366F1"
+PRIMARY_HOVER = "#4F46E5"
+GREEN = "#16A34A"
+RED = "#DC2626"
+TEXT = "#1E293B"
+MUTED = "#64748B"
+LIGHT = "#F1F5F9"
 
-def check_palindrome():
+
+# ---------------- FUNCTIONS ----------------
+def check_palindrome(event=None):
     text = entry.get()
 
     if not text.strip():
-        messagebox.showwarning("Input Required", "Please enter some text.")
+        messagebox.showwarning(
+            "Input Required",
+            "Please enter a word or sentence."
+        )
+        entry.focus_set()
         return
 
-    # Convert to lowercase and remove spaces
+    # Ignore spaces and letter case
     cleaned = "".join(text.lower().split())
 
-    # Stack: Last In, First Out (LIFO)
+    # Stack: LIFO
     stack = []
     for char in cleaned:
         stack.append(char)
@@ -21,7 +37,7 @@ def check_palindrome():
     while stack:
         reversed_text += stack.pop()
 
-    # Queue: First In, First Out (FIFO)
+    # Queue: FIFO
     queue = []
     for char in cleaned:
         queue.append(char)
@@ -30,147 +46,303 @@ def check_palindrome():
     while queue:
         original_text += queue.pop(0)
 
-    # Compare original and reversed text
+    # Check result
     if original_text == reversed_text:
         result_label.config(
-            text="Result: It is a Palindrome!",
-            fg="green"
+            text="✓  It's a Palindrome!",
+            fg=GREEN
         )
+        status_label.config(
+            text="Great! The text reads the same backward.",
+            fg=GREEN
+        )
+        result_card.config(bg="#F0FDF4")
     else:
         result_label.config(
-            text="Result: It is NOT a Palindrome!",
-            fg="red"
+            text="✗  Not a Palindrome",
+            fg=RED
         )
+        status_label.config(
+            text="The text changes when reversed.",
+            fg=RED
+        )
+        result_card.config(bg="#FEF2F2")
 
     details_label.config(
-        text=f"Original: {original_text}\n"
-             f"Reversed: {reversed_text}"
+        text=f"Original : {original_text}\n"
+             f"Reversed : {reversed_text}"
     )
 
 
 def clear_fields():
     entry.delete(0, tk.END)
-    result_label.config(text="Result will appear here", fg="black")
+
+    result_label.config(
+        text="Your result will appear here",
+        fg=TEXT
+    )
+
+    status_label.config(
+        text="Enter text above to get started.",
+        fg=MUTED
+    )
+
     details_label.config(text="")
+    result_card.config(bg=LIGHT)
+    entry.focus_set()
 
 
-# Main window
+def on_enter(event):
+    check_palindrome()
+
+
+# ---------------- MAIN WINDOW ----------------
 root = tk.Tk()
-root.title("Palindrome Checker - Stacks and Queues")
-root.geometry("600x520")
-root.configure(bg="white")
+root.title("Palindrome Checker")
+root.geometry("760x760")
+root.configure(bg=BG)
 root.resizable(False, False)
 
-# Heading
-title_label = tk.Label(
-    root,
-    text="Palindrome Checker",
-    font=("Arial", 22, "bold"),
-    bg="white",
-    fg="#1F3A5F"
+# ---------------- HEADER ----------------
+header = tk.Frame(root, bg=BG)
+header.pack(fill="x", pady=(28, 20))
+
+icon = tk.Label(
+    header,
+    text="↔",
+    font=("Arial", 30, "bold"),
+    bg=BG,
+    fg="#A5B4FC"
 )
-title_label.pack(pady=(20, 5))
+icon.pack()
+
+title = tk.Label(
+    header,
+    text="Palindrome Checker",
+    font=("Arial", 25, "bold"),
+    bg=BG,
+    fg="white"
+)
+title.pack(pady=(2, 5))
 
 subtitle = tk.Label(
-    root,
-    text="Implementation using Stacks and Queues",
+    header,
+    text="A simple demonstration of Stacks and Queues",
     font=("Arial", 11),
-    bg="white",
-    fg="gray"
+    bg=BG,
+    fg="#CBD5E1"
 )
-subtitle.pack(pady=(0, 20))
+subtitle.pack()
 
-# Input section
-input_label = tk.Label(
+
+# ---------------- MAIN CARD ----------------
+main_card = tk.Frame(
     root,
-    text="Enter a word or sentence:",
-    font=("Arial", 12),
-    bg="white"
+    bg=CARD,
+    highlightbackground="#334155",
+    highlightthickness=1
 )
-input_label.pack()
+main_card.pack(fill="both", expand=True, padx=35, pady=(0, 28))
+
+# Input heading
+tk.Label(
+    main_card,
+    text="ENTER YOUR TEXT",
+    font=("Arial", 10, "bold"),
+    bg=CARD,
+    fg=TEXT
+).pack(anchor="w", padx=30, pady=(28, 10))
+
+# Input box
+input_frame = tk.Frame(
+    main_card,
+    bg=LIGHT,
+    highlightbackground="#CBD5E1",
+    highlightthickness=1
+)
+input_frame.pack(fill="x", padx=30)
 
 entry = tk.Entry(
-    root,
-    font=("Arial", 14),
-    width=35,
-    relief="solid",
-    bd=1
+    input_frame,
+    font=("Arial", 15),
+    bg=LIGHT,
+    fg=TEXT,
+    insertbackground=TEXT,
+    relief="flat",
+    bd=0
 )
-entry.pack(pady=10)
+entry.pack(fill="x", padx=14, pady=14)
 entry.focus_set()
 
-# Buttons
-button_frame = tk.Frame(root, bg="white")
-button_frame.pack(pady=10)
+entry.bind("<Return>", on_enter)
+
+# Example hint
+tk.Label(
+    main_card,
+    text="Example: madam, level, racecar",
+    font=("Arial", 10),
+    bg=CARD,
+    fg=MUTED
+).pack(anchor="w", padx=32, pady=(7, 15))
+
+
+# ---------------- BUTTONS ----------------
+button_frame = tk.Frame(main_card, bg=CARD)
+button_frame.pack(fill="x", padx=30)
 
 check_button = tk.Button(
     button_frame,
-    text="Check Palindrome",
+    text="  Check Palindrome  →",
     command=check_palindrome,
     font=("Arial", 11, "bold"),
-    bg="#2563EB",
+    bg=PRIMARY,
     fg="white",
-    padx=12,
-    pady=7,
-    relief="flat"
+    activebackground=PRIMARY_HOVER,
+    activeforeground="white",
+    relief="flat",
+    cursor="hand2",
+    padx=15,
+    pady=12
 )
-check_button.grid(row=0, column=0, padx=8)
+check_button.pack(side="left", fill="x", expand=True, padx=(0, 8))
+
+check_button.bind(
+    "<Enter>",
+    lambda e: check_button.config(bg=PRIMARY_HOVER)
+)
+check_button.bind(
+    "<Leave>",
+    lambda e: check_button.config(bg=PRIMARY)
+)
 
 clear_button = tk.Button(
     button_frame,
-    text="Clear",
+    text="Clear  ↺",
     command=clear_fields,
-    font=("Arial", 11),
-    bg="#E5E7EB",
-    fg="black",
-    padx=20,
-    pady=7,
-    relief="flat"
+    font=("Arial", 11, "bold"),
+    bg="#E2E8F0",
+    fg=TEXT,
+    activebackground="#CBD5E1",
+    relief="flat",
+    cursor="hand2",
+    padx=18,
+    pady=12
 )
-clear_button.grid(row=0, column=1, padx=8)
+clear_button.pack(side="left")
 
-# Result section
-result_label = tk.Label(
-    root,
-    text="Result will appear here",
-    font=("Arial", 14, "bold"),
-    bg="white",
-    fg="black"
+
+# ---------------- RESULT CARD ----------------
+result_card = tk.Frame(
+    main_card,
+    bg=LIGHT,
+    highlightbackground="#E2E8F0",
+    highlightthickness=1
 )
-result_label.pack(pady=15)
+result_card.pack(fill="x", padx=30, pady=(25, 18))
+
+result_label = tk.Label(
+    result_card,
+    text="Your result will appear here",
+    font=("Arial", 17, "bold"),
+    bg=LIGHT,
+    fg=TEXT
+)
+result_label.pack(pady=(18, 5))
+
+status_label = tk.Label(
+    result_card,
+    text="Enter text above to get started.",
+    font=("Arial", 10),
+    bg=LIGHT,
+    fg=MUTED
+)
+status_label.pack(pady=(0, 10))
 
 details_label = tk.Label(
-    root,
+    result_card,
     text="",
-    font=("Arial", 11),
-    bg="white",
-    fg="#374151",
-    justify="center"
+    font=("Consolas", 11),
+    bg=LIGHT,
+    fg=TEXT,
+    justify="left"
 )
-details_label.pack(pady=5)
+details_label.pack(pady=(0, 18))
 
-# Explanation section
-explanation = tk.LabelFrame(
-    root,
-    text="How It Works",
-    font=("Arial", 12, "bold"),
-    bg="white",
-    fg="#1F3A5F",
-    padx=15,
-    pady=10
+
+# ---------------- HOW IT WORKS ----------------
+tk.Label(
+    main_card,
+    text="HOW IT WORKS",
+    font=("Arial", 11, "bold"),
+    bg=CARD,
+    fg=TEXT
+).pack(anchor="w", padx=30, pady=(5, 12))
+
+concepts = tk.Frame(main_card, bg=CARD)
+concepts.pack(fill="x", padx=30)
+
+# Stack box
+stack_box = tk.Frame(
+    concepts,
+    bg="#EEF2FF",
+    highlightbackground="#C7D2FE",
+    highlightthickness=1
 )
-explanation.pack(fill="x", padx=25, pady=15)
+stack_box.pack(side="left", fill="both", expand=True, padx=(0, 7))
 
 tk.Label(
-    explanation,
-    text="Stack (LIFO): Removes characters in reverse order.\n"
-         "Queue (FIFO): Removes characters in original order.\n"
-         "If both strings match, the input is a palindrome.",
-    font=("Arial", 10),
-    bg="white",
-    justify="left",
-    wraplength=500
-).pack(anchor="w")
+    stack_box,
+    text="📚  STACK",
+    font=("Arial", 11, "bold"),
+    bg="#EEF2FF",
+    fg="#4338CA"
+).pack(anchor="w", padx=12, pady=(12, 5))
 
-# Start application
+tk.Label(
+    stack_box,
+    text="LIFO\nLast In, First Out\n\nReverses the characters",
+    font=("Arial", 10),
+    bg="#EEF2FF",
+    fg=TEXT,
+    justify="left"
+).pack(anchor="w", padx=12, pady=(0, 12))
+
+# Queue box
+queue_box = tk.Frame(
+    concepts,
+    bg="#ECFDF5",
+    highlightbackground="#A7F3D0",
+    highlightthickness=1
+)
+queue_box.pack(side="left", fill="both", expand=True, padx=(7, 0))
+
+tk.Label(
+    queue_box,
+    text="⇢  QUEUE",
+    font=("Arial", 11, "bold"),
+    bg="#ECFDF5",
+    fg="#047857"
+).pack(anchor="w", padx=12, pady=(12, 5))
+
+tk.Label(
+    queue_box,
+    text="FIFO\nFirst In, First Out\n\nPreserves the order",
+    font=("Arial", 10),
+    bg="#ECFDF5",
+    fg=TEXT,
+    justify="left"
+).pack(anchor="w", padx=12, pady=(0, 12))
+
+
+# ---------------- FOOTER ----------------
+tk.Label(
+    main_card,
+    text="DATA STRUCTURES  •  STACKS & QUEUES",
+    font=("Arial", 9, "bold"),
+    bg=CARD,
+    fg="#94A3B8"
+).pack(pady=(18, 18))
+
+
+# ---------------- START APPLICATION ----------------
 root.mainloop()
